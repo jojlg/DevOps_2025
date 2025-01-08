@@ -1,0 +1,101 @@
+---
+- name: Configurer la sécurité des serveurs Linux
+  hosts: all
+  become: yes
+  vars_files:
+    - vault/credentials.yml
+  tasks:
+    # --- Section 1 : Désactivation de la connexion root via SSH ---
+    - name: Vérifier si le fichier de configuration SSH existe
+      stat:
+        path: /etc/ssh/sshd_config
+      register: ssh_config
+ 
+    - name: Avertir si le fichier de configuration SSH est introuvable
+      debug:
+        msg: "Le fichier de configuration /etc/ssh/sshd_config est introuvable."
+      when: not ssh_config.stat.exists
+      failed_when: not ssh_config.stat.exists
+ 
+    - name: Désactiver la connexion root via SSH
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitRootLogin'
+        line: 'PermitRootLogin no'
+        state: present
+      notify:
+        - Restart SSH service
+ 
+    # --- Section 2 : Installation et configuration de Fail2Ban ---
+    - name: Modifier le backend de Fail2Ban pour utiliser systemd
+      lineinfile:
+        path: /etc/fail2ban/jail.local
+        regexp: '^backend = .*'
+        line: 'backend = systemd'
+ 
+    - name: Redémarrer le service Fail2Ban
+      systemd:
+        name: fail2ban
+        state: restarted
+        enabled: yes
+ 
+    - name: Vérifier le statut du service Fail2Ban
+      shell: systemctl status fail2ban.service
+      register: fail2ban_status
+      changed_when: false
+ 
+    - name: Afficher le statut du service Fail2Ban
+      debug:
+        var: fail2ban_status.stdout_lines
+ 
+    - name: Vérifier le statut de la jail SSHD
+      shell: fail2ban-client status sshd
+      register: fail2ban_client_status
+      changed_when: false
+ 
+    - name: Afficher le statut de la jail SSHD
+      debug:
+        var: fail2ban_client_status.stdout_lines
+ 
+    # --- Section 3 : Configurer les mises à jour automatiques et le fuseau hora                                                                                                                                                             ire ---
+    - name: Configurer les mises à jour automatiques
+      ansible.builtin.copy:
+        content: |
+          // Activation des mises à jour automatiques pour une sécurité renforcé                                                                                                                                                             e
+          APT::Periodic::Update-Package-Lists "1";    // Mise à jour quotidienne                                                                                                                                                              des listes de paquets
+          APT::Periodic::Download-Upgradeable-Packages "1";  // Téléchargement a                                                                                                                                                             utomatique des mises à jour disponibles
+          APT::Periodic::AutocleanInterval "7";      // Nettoyage des fichiers i                                                                                                                                                             nutilisés tous les 7 jours
+          APT::Periodic::Unattended-Upgrade "1";     // Installation automatique                                                                                                                                                              des mises à jour de sécurité
+        dest: "/etc/apt/apt.conf.d/20auto-upgrades"
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Redémarrer les timers apt-daily
+ 
+    - name: Configurer le fuseau horaire
+      ansible.builtin.timezone:
+        name: "Europe/Paris"  # Remplacez "UTC" par le fuseau horaire préféré, c                                                                                                                                                             omme "Europe/Paris" ou "America/New_York"
+ 
+    - name: Redémarrer les timers apt-daily et apt-daily-upgrade
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+      loop:
+        - apt-daily.timer
+        - apt-daily-upgrade.timer
+ 
+  handlers:
+    - name: Restart SSH service
+      systemd:
+        name: ssh
+        state: restarted
+        enabled: yes
+ 
+    - name: Redémarrer les timers apt-daily
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: restarted
+      loop:
+        - apt-daily.timer
+        - apt-daily-upgrade.timer

@@ -1,0 +1,2 @@
+[Docker]
+srv-docker ansible_host=192.166.1.50 ansible_become_password="{{ ansible_become_password_docker }}" ansible_ssh_private_key_file=/home/ansible/.ssh/id_srv-ansible

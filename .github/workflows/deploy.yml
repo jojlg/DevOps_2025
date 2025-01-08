@@ -1,28 +1,21 @@
-name: CI/CD Pipeline
+name: Ansible Playbook CI/CD
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - '01_playbook_security.yml'
+      - 'hosts'
 
 jobs:
-  build:
-    runs-on: self-hosted
+  run-playbook:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test
-
-      - name: Deploy
-        run: ./deploy.sh
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook -i hosts 01_playbook_security.yml --ask-vault-pass
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}

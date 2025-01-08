@@ -1,0 +1,8 @@
+---
+- name: Vérifier la connectivité avec le serveur Linux
+  hosts: all
+  vars_files:
+    - vault/credentials.yml
+  tasks:
+    - name: Ping du serveur Linux
+      ping:      

@@ -57,15 +57,15 @@
       debug:
         var: fail2ban_client_status.stdout_lines
  
-    # --- Section 3 : Configurer les mises à jour automatiques et le fuseau hora                                                                                                                                                             ire ---
+    # --- Section 3 : Configurer les mises à jour automatiques et le fuseau horaire ---
     - name: Configurer les mises à jour automatiques
       ansible.builtin.copy:
         content: |
-          // Activation des mises à jour automatiques pour une sécurité renforcé                                                                                                                                                             e
-          APT::Periodic::Update-Package-Lists "1";    // Mise à jour quotidienne                                                                                                                                                              des listes de paquets
-          APT::Periodic::Download-Upgradeable-Packages "1";  // Téléchargement a                                                                                                                                                             utomatique des mises à jour disponibles
-          APT::Periodic::AutocleanInterval "7";      // Nettoyage des fichiers i                                                                                                                                                             nutilisés tous les 7 jours
-          APT::Periodic::Unattended-Upgrade "1";     // Installation automatique                                                                                                                                                              des mises à jour de sécurité
+          // Activation des mises à jour automatiques pour une sécurité renforcée
+          APT::Periodic::Update-Package-Lists "1";    // Mise à jour quotidienne des listes de paquets
+          APT::Periodic::Download-Upgradeable-Packages "1";  // Téléchargement automatique des mises à jour disponibles
+          APT::Periodic::AutocleanInterval "7";      // Nettoyage des fichiers inutilisés tous les 7 jours
+          APT::Periodic::Unattended-Upgrade "1";     // Installation automatiquedes mises à jour de sécurité
         dest: "/etc/apt/apt.conf.d/20auto-upgrades"
         owner: root
         group: root
@@ -75,7 +75,7 @@
  
     - name: Configurer le fuseau horaire
       ansible.builtin.timezone:
-        name: "Europe/Paris"  # Remplacez "UTC" par le fuseau horaire préféré, c                                                                                                                                                             omme "Europe/Paris" ou "America/New_York"
+        name: "Europe/Paris"  # Remplacez "UTC" par le fuseau horaire préféré, comme "Europe/Paris" ou "America/New_York" comme "Europe/Paris" ou "America/New_York"
  
     - name: Redémarrer les timers apt-daily et apt-daily-upgrade
       ansible.builtin.systemd:

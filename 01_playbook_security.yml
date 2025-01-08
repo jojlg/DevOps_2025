@@ -1,6 +1,6 @@
 ---
 - name: Configurer la sécurité des serveurs Linux
-  hosts: srv_docker
+  hosts: srv-docker
   become: yes
   vars_files:
     - vault/credentials.yml

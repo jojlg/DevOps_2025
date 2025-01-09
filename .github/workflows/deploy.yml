@@ -14,8 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Create vault password file
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_password.txt
+
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook -i hosts 01_playbook_security.yml --ask-vault-pass
+          ansible-playbook -i hosts 01_playbook_security.yml --vault-password-file vault_password.txt
         env:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+
+      - name: Clean up
+        run: rm vault_password.txt

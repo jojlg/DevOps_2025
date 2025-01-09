@@ -1,6 +1,6 @@
 ---
 - name: Vérifier la connectivité avec le serveur Linux
-  hosts: srv-docker
+  hosts: docker-servers
   vars_files:
     - vault/credentials.yml
   tasks:

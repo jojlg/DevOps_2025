@@ -25,7 +25,7 @@
         state: present
       notify:
         - Restart SSH service
-         
+ 
     # --- Section 3 : Configurer les mises à jour automatiques et le fuseau horaire ---
     - name: Configurer les mises à jour automatiques
       ansible.builtin.copy:
@@ -68,3 +68,5 @@
       loop:
         - apt-daily.timer
         - apt-daily-upgrade.timer
+
+#test

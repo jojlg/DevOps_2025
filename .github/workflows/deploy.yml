@@ -19,7 +19,7 @@ jobs:
 
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook -i hosts 01_playbook_security.yml --vault-password-file vault_password.txt
+          ansible-playbook -i /home/ansible/DevOps_2025/hosts /home/ansible/DevOps_2025/01_playbook_security.yml --vault-password-file vault_password.txt
         env:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
 

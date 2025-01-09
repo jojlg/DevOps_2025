@@ -26,37 +26,6 @@
       notify:
         - Restart SSH service
  
-    # --- Section 2 : Installation et configuration de Fail2Ban ---
-    - name: Modifier le backend de Fail2Ban pour utiliser systemd
-      lineinfile:
-        path: /etc/fail2ban/jail.local
-        regexp: '^backend = .*'
-        line: 'backend = systemd'
- 
-    - name: Redémarrer le service Fail2Ban
-      systemd:
-        name: fail2ban
-        state: restarted
-        enabled: yes
- 
-    - name: Vérifier le statut du service Fail2Ban
-      shell: systemctl status fail2ban.service
-      register: fail2ban_status
-      changed_when: false
- 
-    - name: Afficher le statut du service Fail2Ban
-      debug:
-        var: fail2ban_status.stdout_lines
- 
-    - name: Vérifier le statut de la jail SSHD
-      shell: fail2ban-client status sshd
-      register: fail2ban_client_status
-      changed_when: false
- 
-    - name: Afficher le statut de la jail SSHD
-      debug:
-        var: fail2ban_client_status.stdout_lines
- 
     # --- Section 3 : Configurer les mises à jour automatiques et le fuseau horaire ---
     - name: Configurer les mises à jour automatiques
       ansible.builtin.copy:

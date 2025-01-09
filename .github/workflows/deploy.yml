@@ -17,11 +17,6 @@ jobs:
       - name: Create vault password file
         run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_password.txt
 
-      - name: Ensure Fail2Ban configuration directory exists
-        run: |
-          sudo mkdir -p /etc/fail2ban
-          sudo touch /etc/fail2ban/jail.local
-        continue-on-error: true  # Permet de ne pas échouer si le répertoire est déjà présent
 
       - name: Run Ansible Playbook
         run: |

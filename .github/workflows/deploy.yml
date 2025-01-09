@@ -3,25 +3,37 @@ name: Ansible Playbook CI/CD
 on:
   push:
     paths:
-      - '01_playbook_security.yml'
-      - 'hosts'
+      
+'01_playbook_security.yml'
+'hosts'
 
 jobs:
   run-playbook:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      
+name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Create vault password file
-        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_password.txt
+      
+name: Create vault password file
+      run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_password.txt
 
-      - name: Run Ansible Playbook
-        run: |
-          ansible-playbook -i /home/ansible/DevOps_2025/hosts /home/ansible/DevOps_2025/01_playbook_security.yml --vault-password-file vault_password.txt
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+      
+name: Ensure Fail2Ban configuration directory exists
+      run: |
+        sudo mkdir -p /etc/fail2ban
+        sudo touch /etc/fail2ban/jail.local
+      continue-on-error: true  # Permet de ne pas échouer si le répertoire est déjà présent
 
-      - name: Clean up
-        run: rm vault_password.txt
+      
+name: Run Ansible Playbook
+      run: |
+        ansible-playbook -i /home/ansible/DevOps_2025/hosts /home/ansible/DevOps_2025/01_playbook_security.yml --vault-password-file vault_password.txt
+      env:
+        ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+
+      
+name: Clean up
+      run: rm vault_password.txt

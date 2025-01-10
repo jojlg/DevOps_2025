@@ -8,21 +8,24 @@ on:
 
 jobs:
   run-playbook:
-    runs-on: self-hosted
+    runs-on: self-hosted  # Exécuté directement sur ta VM Ansible
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2  # Clone automatiquement le dépôt sur le runner
+
+      - name: Copier les fichiers dans le dossier Ansible
+        run: |
+          rsync -av --delete . /home/ansible/DevOps_2025/
 
       - name: Create vault password file
-        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_password.txt
-
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /home/ansible/DevOps_2025/vault_password.txt
 
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook -i /home/ansible/DevOps_2025/hosts /home/ansible/DevOps_2025/01_playbook_security.yml --vault-password-file vault_password.txt
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+          cd /home/ansible/DevOps_2025
+          ansible-playbook -i hosts 01_playbook_security.yml --vault-password-file vault_password.txt
+        working-directory: /home/ansible/DevOps_2025  # Définit le répertoire de travail
 
       - name: Clean up
-        run: rm vault_password.txt
+        run: rm /home/ansible/DevOps_2025/vault_password.txt

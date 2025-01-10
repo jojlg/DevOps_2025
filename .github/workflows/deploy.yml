@@ -14,9 +14,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2  # Clone automatiquement le dépôt sur le runner
 
-      - name: Copier les fichiers dans le dossier Ansible
+      - name: Copier les fichiers dans le dossier Ansible en excluant certains dossiers
         run: |
-          rsync -av --delete . /home/ansible/DevOps_2025/
+          rsync -av --delete --exclude='group_vars/' --exclude='vault/' . /home/ansible/DevOps_2025/
 
       - name: Create vault password file
         run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /home/ansible/DevOps_2025/vault_password.txt

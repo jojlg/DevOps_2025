@@ -5,4 +5,4 @@
     - vault/credentials.yml
   tasks:
     - name: Ping du serveur Linux
-      ping:      
+      ping:

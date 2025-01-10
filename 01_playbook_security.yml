@@ -10,13 +10,13 @@
       stat:
         path: /etc/ssh/sshd_config
       register: ssh_config
- 
+
     - name: Avertir si le fichier de configuration SSH est introuvable
       debug:
         msg: "Le fichier de configuration /etc/ssh/sshd_config est introuvable."
       when: not ssh_config.stat.exists
       failed_when: not ssh_config.stat.exists
- 
+
     - name: Désactiver la connexion root via SSH
       lineinfile:
         path: /etc/ssh/sshd_config
@@ -25,27 +25,40 @@
         state: present
       notify:
         - Restart SSH service
- 
+
+    # --- Section 2 : Installation et activation de Fail2Ban ---
+    - name: Installer Fail2Ban
+      ansible.builtin.apt:
+        name: fail2ban
+        state: present
+        update_cache: yes
+
+    - name: Activer et démarrer Fail2Ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: started
+        enabled: yes
+
     # --- Section 3 : Configurer les mises à jour automatiques et le fuseau horaire ---
     - name: Configurer les mises à jour automatiques
       ansible.builtin.copy:
         content: |
           // Activation des mises à jour automatiques pour une sécurité renforcée
-          APT::Periodic::Update-Package-Lists "1";    // Mise à jour quotidienne des listes de paquets
-          APT::Periodic::Download-Upgradeable-Packages "1";  // Téléchargement automatique des mises à jour disponibles
-          APT::Periodic::AutocleanInterval "7";      // Nettoyage des fichiers inutilisés tous les 7 jours
-          APT::Periodic::Unattended-Upgrade "1";     // Installation automatiquedes mises à jour de sécurité
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Download-Upgradeable-Packages "1";
+          APT::Periodic::AutocleanInterval "7";
+          APT::Periodic::Unattended-Upgrade "1";
         dest: "/etc/apt/apt.conf.d/20auto-upgrades"
         owner: root
         group: root
         mode: '0644'
       notify:
         - Redémarrer les timers apt-daily
- 
+
     - name: Configurer le fuseau horaire
       ansible.builtin.timezone:
-        name: "Europe/Paris"  # Remplacez "UTC" par le fuseau horaire préféré, comme "Europe/Paris" ou "America/New_York" comme "Europe/Paris" ou "America/New_York"
- 
+        name: "Europe/Paris"
+
     - name: Redémarrer les timers apt-daily et apt-daily-upgrade
       ansible.builtin.systemd:
         name: "{{ item }}"
@@ -53,14 +66,19 @@
       loop:
         - apt-daily.timer
         - apt-daily-upgrade.timer
- 
+
   handlers:
     - name: Restart SSH service
       systemd:
         name: ssh
         state: restarted
         enabled: yes
- 
+
+    - name: Restart Fail2Ban service
+      systemd:
+        name: fail2ban
+        state: restarted
+
     - name: Redémarrer les timers apt-daily
       ansible.builtin.systemd:
         name: "{{ item }}"

@@ -86,4 +86,3 @@
       loop:
         - apt-daily.timer
         - apt-daily-upgrade.timer
-#Test de deploiement
